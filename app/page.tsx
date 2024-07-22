@@ -1,112 +1,129 @@
-import Image from "next/image";
+"use client";
+
+import LuaEditor from "@/components/LuaEditor";
+import Sidebar from "@/components/Sidebar";
+import { editor } from "monaco-editor";
+import { useState } from "react";
+import Toolbar from "@/components/Toolbar";
+
+const serverScripts = [
+  {
+    id: 0,
+    name: "script.lua",
+    language: "lua",
+    value:
+      "function onPlayerEnter() \n\tHud.console.write('Hello, world!') \nend",
+  },
+  {
+    id: 1,
+    name: "script2.lua",
+    language: "lua",
+    value: "function onPlayerEnter() \n\tHud.console.write('Teste') \nend",
+  },
+  {
+    id: 2,
+    name: "long script3.lua",
+    language: "lua",
+    value: "function onPlayerEnter() \n\tHud.console.write('Mapinhooo') \nend",
+  },
+];
 
 export default function Home() {
+  const [scripts, setScripts] = useState(serverScripts);
+  const [activeScript, setActiveScript] = useState(serverScripts[0]);
+  const [editorRef, setEditorRef] = useState<editor.IStandaloneCodeEditor>();
+
+  const handleCreateScript = () => {
+    console.log("new script");
+    const newScript = {
+      id: scripts.length,
+      name: "newLongScript.lua",
+      language: "lua",
+      value: "",
+    };
+    setScripts(() => [...scripts, newScript]);
+  };
+
+  const handleRenameScript = () => {
+    console.log("rename script");
+  };
+
+  const handleDuplicateScript = () => {
+    console.log("duplicate script");
+    const copyScript = {
+      id: scripts.length,
+      name: `${activeScript.name}_copy.lua`,
+      language: "lua",
+      value: activeScript.value,
+    };
+    setScripts(() => [...scripts, copyScript]);
+  };
+
+  const handleMoveToTrash = () => {
+    console.log("move to trash");
+  };
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 w-full max-w-5xl items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">app/page.tsx</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:size-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
+    <main>
+      <div className="flex bg-slate-400 w-full h-[100vh] justify-center items-center">
+        <div className="flex h-[900px] w-11/12 p-3 gap-2 bg-slate-500 rounded-lg">
+          <div className="">
+            <Sidebar
+              scripts={scripts}
+              activeScriptId={activeScript.id}
+              setActiveScript={setActiveScript}
             />
-          </a>
+          </div>
+          <div className="flex flex-col w-full h-full gap-2">
+            <div className="flex justify-between items-center">
+              <div className="flex gap-2 items-center">
+                <div className="dropdown">
+                  <div tabIndex={0} role="button" className="btn">
+                    {activeScript.name}
+                  </div>
+                  <ul
+                    tabIndex={0}
+                    className="p-2 shadow menu dropdown-content bg-base-100 rounded-box w-52 z-[1]"
+                  >
+                    <li>
+                      <button onClick={() => handleCreateScript()}>
+                        Create
+                      </button>
+                    </li>
+                    <li>
+                      <button onClick={() => handleRenameScript()}>
+                        Rename
+                      </button>
+                    </li>
+                    <li>
+                      <button onClick={() => handleDuplicateScript()}>
+                        Duplicate
+                      </button>
+                    </li>
+                    <li>
+                      <button onClick={() => handleMoveToTrash()}>
+                        Move to Trash
+                      </button>
+                    </li>
+                  </ul>
+                </div>
+                <button className="btn btn-xs">save</button>
+                <button className="btn btn-xs">assign</button>
+              </div>
+              {editorRef && <Toolbar editor={editorRef} />}
+              {/* <div>buttons</div> */}
+            </div>
+            <LuaEditor script={activeScript} setEditorRef={setEditorRef} />
+            <div className="flex justify-between">
+              <div className="border-purple-400 border-2 rounded-lg justify-center items-center px-4 py-2">
+                Explain code
+              </div>
+              <div className="border-purple-400 border-2 rounded-lg justify-center items-center px-4 py-2">
+                Commit Changes
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
-
-      <div className="relative z-[-1] flex place-items-center before:absolute before:h-[300px] before:w-full before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-full after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 sm:before:w-[480px] sm:after:w-[240px] before:lg:h-[360px]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className="mb-32 grid text-center lg:mb-0 lg:w-full lg:max-w-5xl lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Docs{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Learn{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Templates{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            Explore starter templates for Next.js.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Deploy{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-balance text-sm opacity-50">
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
       </div>
     </main>
   );
